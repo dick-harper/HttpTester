@@ -12,15 +12,24 @@ client.DefaultRequestHeaders.Accept.Add(
 // necessary to retrieve information from GitHub
 client.DefaultRequestHeaders.Add("User-Agent", ".NET Foundation Repository Reporter");
 
-await ProcessRepositoriesAsyncy(client);
+var repositories = await ProcessRepositoriesAsyncy(client);
 
-static async Task ProcessRepositoriesAsyncy(HttpClient client)
+foreach (var repo in repositories)
+{
+  Console.WriteLine($"Name: {repo.Name}");
+  Console.WriteLine($"Homepage: {repo.Homepage}");
+  Console.WriteLine($"GitHub: {repo.GitHubHomeUrl}");
+  Console.WriteLine($"Description: {repo.Description}");
+  Console.WriteLine($"Watchers: {repo.Watchers:#,0}");
+  Console.WriteLine($"{repo.LastPush}");
+  Console.WriteLine();
+}
+
+static async Task<List<Repository>> ProcessRepositoriesAsyncy(HttpClient client)
 {
   await using Stream stream =
     await client.GetStreamAsync("https://api.github.com/orgs/dotnet/repos");
   var repositories =
       await JsonSerializer.DeserializeAsync<List<Repository>>(stream);
-
-  foreach (var repo in repositories ?? Enumerable.Empty<Repository>())
-    Console.WriteLine(repo.Name);
+  return repositories ?? new();
 }
