@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Headers;
+using System.Text.Json;
 
 using HttpClient client = new();
 
@@ -15,8 +16,11 @@ await ProcessRepositoriesAsyncy(client);
 
 static async Task ProcessRepositoriesAsyncy(HttpClient client)
 {
-  var json = await client.GetStringAsync(
-         "https://api.github.com/orgs/dotnet/repos");
+  await using Stream stream =
+    await client.GetStreamAsync("https://api.github.com/orgs/dotnet/repos");
+  var repositories =
+      await JsonSerializer.DeserializeAsync<List<Repository>>(stream);
 
-  Console.Write(json);
+  foreach (var repo in repositories ?? Enumerable.Empty<Repository>())
+    Console.WriteLine(repo.Name);
 }
