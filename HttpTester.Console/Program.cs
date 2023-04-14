@@ -25,6 +25,8 @@ foreach (var repo in repositories)
   Console.WriteLine();
 }
 
+Console.ReadLine();
+
 static async Task<List<Repository>> ProcessRepositoriesAsyncy(HttpClient client)
 {
   await using Stream stream =
